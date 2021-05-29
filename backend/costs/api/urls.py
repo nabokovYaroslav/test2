@@ -6,11 +6,11 @@ from .viewsets import CategoryViewset, CostViewset, IncomeViewset
 app_name='costs'
 
 router = routers.SimpleRouter()
-router.register(r'incomes', IncomeViewset)
-router.register(r'categories', CategoryViewset)
+router.register(r'incomes', IncomeViewset, basename='Income')
+router.register(r'categories', CategoryViewset, basename='Category')
 
 categories_router = routers.NestedSimpleRouter(router, r'categories', lookup='category')
-categories_router.register(r'costs', CostViewset)
+categories_router.register(r'costs', CostViewset, basename='Cost')
 
 
 router.register(r'categories', CategoryViewset)

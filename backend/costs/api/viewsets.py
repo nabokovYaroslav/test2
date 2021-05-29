@@ -1,9 +1,11 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import request, serializers, viewsets
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import CategorySerializer, IncomeSerializer, CostSerializer
 from authentication.models import Category, Income
 from costs.models import Cost
-from costs.selectors import get_cost_list_or_404
+from costs.selectors import get_costs_list_or_404, get_user_costs_list_or_404
+from rest_framework.response import Response
 
 
 class CategoryViewset(viewsets.ModelViewSet):
@@ -29,11 +31,27 @@ class IncomeViewset(viewsets.ModelViewSet):
     return Income.objects.filter(user=self.request.user)
   
 
-class CostViewset(viewsets.ModelViewSet):
+class CostViewset(viewsets.ViewSet):
   permission_classes = [IsAuthenticated]
   serializer_class = CostSerializer
-  queryset = Cost.objects.all()
 
-  def get_queryset(self):
-    return get_cost_list_or_404(self)
+  def get_queryset(self, category_pk=None, pk=None):
+    if self.request.user.is_staff:
+      return get_costs_list_or_404(category_pk)
+    return get_user_costs_list_or_404(self, category_pk)
+
+  def list(self, request, category_pk=None):
+    queryset = self.get_queryset(category_pk=category_pk)
+    serializer = CostSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+  def retrieve(self, request, category_pk=None, pk=None):
+    queryset = self.get_queryset(category_pk=category_pk)
+    cost = get_object_or_404(queryset, id=pk)
+    serializer = CostSerializer(cost)
+    print(serializer.data)
+    return Response(serializer.data)
+  
+
+  
   
