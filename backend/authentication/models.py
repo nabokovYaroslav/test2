@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from django.db import models
 from django.db.models import Func, F, Value, IntegerField, ExpressionWrapper, DecimalField
 from django.db.models.aggregates import Sum
-from datetime import datetime
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
@@ -36,7 +37,6 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
   email = models.EmailField(unique=True)
   user_name = models.CharField(max_length=128, unique=True)
   created_at = models.DateTimeField(auto_now=True)
@@ -46,8 +46,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
   @property
   def balance(self):
-    full_income = Income.objects.filter(user_id=self.id).annotate(months=ExpressionWrapper(Func(F('added_at'), Value(f'{datetime.now().date()}'), function='_diffmonth'), output_field=IntegerField())).aggregate(full_income=Sum(F('months')*F('money'), output_field=DecimalField()))
-    full_cost = Category.objects.filter(user_id=self.id).prefetch_related('cost').aggregate(full_cost=Sum('cost__money', output_field = DecimalField()))
+    full_income = (Income
+                   .objects
+                   .filter(user_id=self.id)
+                   .annotate(months=ExpressionWrapper(Func(F('added_at'), Value(f'{datetime.now().date()}'), function='_diffmonth'), output_field=IntegerField()))
+                   .aggregate(full_income=Sum(F('months')*F('money'), output_field=DecimalField()))
+                   )
+    full_cost = (Category
+                 .objects
+                 .filter(user_id=self.id)
+                 .prefetch_related('cost')
+                 .aggregate(full_cost=Sum('cost__money', output_field = DecimalField()))
+                 )
     return full_income['full_income'] - full_cost['full_cost']
 
   USERNAME_FIELD = 'email'

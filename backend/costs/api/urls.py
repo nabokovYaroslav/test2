@@ -1,20 +1,19 @@
 from django.urls import path, include
-from rest_framework import routers, urlpatterns
+
 from rest_framework_nested import routers
-from .viewsets import CategoryViewset, CostViewset, IncomeViewset
+
+from costs.api.viewsets import CategoryViewset, CostViewset, IncomeViewset
+
 
 app_name='costs'
 
 router = routers.SimpleRouter()
-router.register(r'incomes', IncomeViewset, basename='Income')
-router.register(r'categories', CategoryViewset, basename='Category')
+router.register(r'incomes', IncomeViewset, basename='incomes')
+router.register(r'categories', CategoryViewset, basename='categories')
 
 categories_router = routers.NestedSimpleRouter(router, r'categories', lookup='category')
-categories_router.register(r'costs', CostViewset, basename='Cost')
+categories_router.register(r'costs', CostViewset, basename='costs')
 
-
-router.register(r'categories', CategoryViewset)
-router.register(r'incomes', IncomeViewset)
 urlpatterns = [
   path('', include(router.urls)),
   path('', include(categories_router.urls))
