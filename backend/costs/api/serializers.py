@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from authentication.models import Category, Income
-
 from costs.models import Cost
 
 

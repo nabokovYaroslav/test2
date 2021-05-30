@@ -3,7 +3,9 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from .views import UserCreate
+
+from authentication.api.views import UserCreate
+
 
 app_name = 'authentication'
 urlpatterns = [

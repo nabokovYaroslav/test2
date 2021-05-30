@@ -1,5 +1,4 @@
 from django.urls import path, include
-
 from rest_framework_nested import routers
 
 from costs.api.viewsets import CategoryViewset, CostViewset, IncomeViewset
