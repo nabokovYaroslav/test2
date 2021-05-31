@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from costs.api.serializers import CategorySerializer, IncomeSerializer, CostSerializer
 from costs.models import Cost
-from costs.selectors import get_costs_list_or_404, get_user_costs_list_or_404
+from costs.selectors import get_costs_of_category_list_or_404, get_user_costs_of_category_list_or_404
 from costs.services import get_cost_in_range
 from authentication.models import Category, Income
 
@@ -35,14 +35,14 @@ class IncomeViewset(viewsets.ModelViewSet):
     return Income.objects.filter(user=self.request.user)
   
 
-class CostViewset(viewsets.ViewSet):
+class CostOfCategoryViewset(viewsets.ViewSet):
   permission_classes = [IsAuthenticated]
   serializer_class = CostSerializer
 
   def get_queryset(self, category_pk=None, pk=None):
     if self.request.user.is_staff:
-      return get_costs_list_or_404(category_pk)
-    return get_user_costs_list_or_404(self, category_pk)
+      return get_costs_of_category_list_or_404(category_pk)
+    return get_user_costs_of_category_list_or_404(self, category_pk)
 
   def list(self, request, category_pk=None):
     queryset = self.get_queryset(category_pk=category_pk)
@@ -78,3 +78,13 @@ class CostViewset(viewsets.ViewSet):
   def partial_update(self, request, *args, **kwargs):
     kwargs['partial'] = True
     return self.update(request, *args, **kwargs)
+
+
+class CostViewset(viewsets.GenericViewSet, mixins.ListModelMixin):
+  permission_classes = [IsAuthenticated]
+  serializer_class = CostSerializer
+
+  def get_queryset(self):
+    if self.request.user.is_staff:
+      return Cost.objects.all()
+    return Cost.objects.select_related('category').filter(category__user=self.request.user)
