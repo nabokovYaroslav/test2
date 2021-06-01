@@ -13,6 +13,9 @@ export default {
   name: 'App',
   components:{
     Menu,
+  },
+  created(){
+    this.$store.dispatch('getUser')
   }
 }
 </script>
