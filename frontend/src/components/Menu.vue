@@ -3,25 +3,32 @@
       <div class="container">
         <div class="menu row">
           <div class="col-xs-2 placelogo">
-            <a href="" class="logo">
-              <img :src="image" alt="">
-            </a>
+            <router-link
+              to="/home"
+            >
+              <a class="logo">
+                <img :src="image" alt="">
+              </a>
+            </router-link>
           </div>
           <div class="col-xs-10 burger">
             <svg height="20px" viewBox="0 -53 384 384" width="20px" xmlns="http://www.w3.org/2000/svg"><path d="m368 154.667969h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 32h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 277.332031h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/></svg>
           </div>
           <div class="col-lg-10 col-xs-12 links">
             <ul>
-              <router-link 
-                v-for="(item, index) in menuList"
-                :key="index"
-                :to="item.url"
-                tag="li"
-                active-class="active"
-              >
-                <a>{{item.text}}</a>
-              </router-link>
-              <template v-if="!authenticated">
+              <template v-if="user">
+                <router-link 
+                  v-for="(item, index) in menuList"
+                  :key="index"
+                  :to="item.url"
+                  tag="li"
+                  active-class="active"
+                >
+                  <a>{{item.text}}</a>
+                </router-link>
+              </template>
+              
+              <template v-if="!user">
                 <router-link
 										to="/login"
 										tag="li"
@@ -38,13 +45,9 @@
                 </router-link>
               </template>
               <template v-else>
-                <router-link
-										to="/logout"
-										tag="li"
-										active-class="active"
-                >
-                  <a>Logout</a>
-                </router-link>
+                  <li>
+                    <a href="javascript:void(0)" @click="logout">Logout</a>
+                  </li>
               </template>
             </ul>
           </div>
@@ -64,10 +67,23 @@ export default {
       "authenticated": false
     }
   },
+  methods:{
+    logout(){
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      this.$store.dispatch('user/logout')
+      if(this.$route.path != '/home'){
+        this.$router.push('/home')
+      }
+    }
+  },
   computed:{
     ...mapGetters('menu', {
       menuList: 'items'
     }),
+    ...mapGetters('user', {
+      user: 'user'
+    })
   }
 
 }

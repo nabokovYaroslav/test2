@@ -37,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     if full_income['full_income'] is None:
       full_income['full_income'] = 0
     if full_cost['full_cost'] is None:
-      full_income['full_income'] = 0
+      full_cost['full_cost'] = 0
     return full_income['full_income'] - full_cost['full_cost']
 
   USERNAME_FIELD = 'email'

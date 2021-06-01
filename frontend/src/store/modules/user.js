@@ -2,6 +2,7 @@ import Request from "../../api/request";
 import { HTTP } from "../../api/common";
 
 export default {
+  namespaced: true,
   state: {
     user: null,
   },
@@ -26,6 +27,9 @@ export default {
       };
       const user = await Request(request);
       store.commit("setUser", user.data);
+    },
+    logout(store) {
+      store.commit("setUser", null);
     },
   },
 };

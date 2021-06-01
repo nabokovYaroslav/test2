@@ -6,7 +6,7 @@
 </template>
 
 <script>
-
+import {mapGetters} from 'vuex'
 import Menu from "./components/Menu"
 
 export default {
@@ -14,8 +14,13 @@ export default {
   components:{
     Menu,
   },
+  computed:{
+    ...mapGetters('user',{
+      user:'user'
+    })
+  },
   created(){
-    this.$store.dispatch('getUser')
+    this.$store.dispatch('user/getUser')
   }
 }
 </script>
