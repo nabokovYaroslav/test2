@@ -1,6 +1,6 @@
 from django.db import models
 
-from authentication.models import Category
+from users.models import Category
 
 
 class Cost(models.Model):

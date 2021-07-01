@@ -1,0 +1,17 @@
+SECRET_KEY=django-insecure-8&k6a1th+6i7=sma2_*tn-1fywaz2vtpyux)s!ie1ig06ee1ep
+
+**database**
+
+DB_NAME=costs
+USER=yaroslav
+PASSWORD=nabokov
+
+**user**
+
+USER_EMAIL=yarikoldcssplayer1@mail.ru
+USER_PASSWORD=yarikoldcssplayer1
+
+**superuser**
+
+SUPERUSER_EMAIL=admin@mail.ru
+SUPERUSER_PASSWORD=admin

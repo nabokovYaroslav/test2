@@ -9,7 +9,7 @@ app_name='costs'
 router = routers.SimpleRouter()
 router.register(r'incomes', IncomeViewset, basename='incomes')
 router.register(r'categories', CategoryViewset, basename='categories')
-router.register(r'costs', CostViewset, basename='costs')
+router.register(r'', CostViewset, basename='costs')
 
 categories_router = routers.NestedSimpleRouter(router, r'categories', lookup='category')
 categories_router.register(r'costs', CostOfCategoryViewset, basename='costs_of_category')

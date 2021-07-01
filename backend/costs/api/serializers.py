@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from authentication.models import Category, Income
+from users.models import Category, Income
 from costs.models import Cost
 
 
@@ -17,6 +17,8 @@ class IncomeSerializer(serializers.ModelSerializer):
 
 
 class CostSerializer(serializers.ModelSerializer):
+  category_name = serializers.CharField(read_only=True, source='category.name')
+  
   class Meta:
     model = Cost
-    fields = '__all__'
+    fields = ('id', 'category', 'category_name', 'name', 'money')
