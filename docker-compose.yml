@@ -1,14 +1,27 @@
 version: '3'
 
 services:
-  web:
-    build: .
+  client:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    command: npm run --prefix frontend serve
+    volumes:
+      - .:/client
+    ports:
+      - "8081:8081"
+    depends_on: 
+      - server
+  server:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
     command: python ./backend/manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/code
+      - .:/server
     ports:
       - "8000:8000"
-    depends_on:
+    links:
       - db
   db:
     image: postgres
