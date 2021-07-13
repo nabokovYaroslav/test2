@@ -1,19 +1,23 @@
 <template>
   <section class="login">
     <div class="container">
-      <div class="form">
+      <div class="form" v-if="!userIsLoading">
         <h1>Sign in</h1>
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit({email: email.text, password: password.text})">
+          <div class="error" v-if="error.visible">
+            <p>{{error.text}}</p>
+          </div>
           <div>
             <label for="email">Email</label>
-            <input type="text" id="email" v-model="email" required>
+            <input :class="email.error?'error':''" type="text" id="email" @input="emailOnInput" v-model="email.text" required>
           </div>
           <div>
             <label for="password">Password</label>
-            <input type="password" id="password" v-model="password" required>
+            <input :class="password.error?'error':''" type="password" id="password" @input="passwordOnInput" v-model="password.text" required>
           </div>
           <div>
-            <button type="submit">Submit</button>
+            <div v-if="loader" class="loader"></div>
+            <button v-else type="submit" :disabled="isButtonDisabled">Submit</button>
           </div>
         </form>
       </div>
@@ -22,34 +26,105 @@
 </template>
 
 <script>
-import {HTTP} from "../api/common"
+import {mapGetters, mapActions} from 'vuex'
 
 export default{
 
-  name: 'login',
+  name: 'Login',
   data(){
     return{
-      email: '',
-      password: '',
-    }
-  },
-  methods:{
-    async submit(){
-      try {
-        const tokens = await HTTP.post('authentication/token/', {
-          email: this.email,
-          password: this.password,
-        })
-        localStorage.setItem('access_token', tokens.data.access)
-        localStorage.setItem('refresh_token', tokens.data.refresh)
-        this.$store.dispatch('user/getUser')
-        this.$router.push('/home')
-      } catch (error) {
-        console.log(error)
+      email: {
+        text: '',
+        error: false,
+      },
+      password: {
+        text: '',
+        error: false,
+      },
+      loader: false,
+      error: {
+        visible: false,
+        text: ''
       }
-      
     }
   },
+
+  computed:{
+    ...mapGetters('user',{
+      userIsLoading: 'userIsLoading',
+      authenticated: 'authenticated'
+    }),
+    isButtonDisabled(){
+      if(!this.email.error && !this.password.error){
+        return false
+      }
+      return true
+    }
+  },
+
+  methods:{
+    ...mapActions('user', {
+      login: 'login',
+      redirect: 'redirect'
+    }),
+    async submit(payload){
+      try {
+        this.loader = true
+        if(payload.email==''){
+          this.email.error = true
+          throw new Error("Enter email")
+        }
+        if(payload.password==''){
+          this.password.error = true
+          throw new Error("Enter password")
+        }
+        await this.login(payload)
+      } 
+      catch (error) {
+        if(error.response){
+          const status = error.response.status
+          if(status == 401){
+            this.error.text = 'Invalid email or password'
+          }else if(status == 500){
+            this.error.text = 'Server side error, please try again later'
+          }else{
+            this.error.text = 'Unknown error'
+          }
+        }else if(error instanceof Error){
+          this.error.text = error.message
+        }
+        this.error.visible = true
+      } 
+      finally{
+        this.loader = false
+      }
+    },
+    emailOnInput(){
+      if(this.email.error){
+        this.email.error = false
+      }
+      this.checkError()
+    },
+    passwordOnInput(){
+      if(this.password.error){
+        this.password.error = false
+      }
+      this.checkError()
+    },
+    checkError(){
+      if(!this.email.error && !this.password.error){
+        this.error.visible = false
+      }
+    }
+  },
+
+  watch:{
+    userIsLoading(){
+      if(this.authenticated){
+        this.redirect()
+      }
+    }
+  }
 }
 </script>
 
@@ -94,6 +169,9 @@ export default{
   width: 100%;
   outline: none
 }
+.login .form form input.error{
+  border-color: red;
+}
 .login .form form button{
   padding: 10px 20px;
   background-color: #000;
@@ -110,5 +188,10 @@ export default{
   color: #47d899;
   border-color: #47d899;
   background-color: #fff;
+}
+.error p{
+  font-style: italic;
+  color: red;
+  font-size: 12px;
 }
 </style>

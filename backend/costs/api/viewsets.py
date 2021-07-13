@@ -5,15 +5,22 @@ from rest_framework.permissions import IsAuthenticated
 
 from costs.api.serializers import CategorySerializer, IncomeSerializer, CostSerializer
 from costs.models import Cost
-from costs.selectors import (get_costs_of_category, get_cost_of_category, get_costs, get_incomes, get_income,
+from costs.selectors import (get_costs_of_category, get_cost_of_category, get_costs, get_cost, get_incomes, get_income,
                              get_categories, get_category)
 from costs.services import calc_costs
 from users.models import Category, Income
+from utils.permissions import IsOwnerOrIsAdmin
 
 
 class CategoryViewset(viewsets.ModelViewSet):
-  permission_classes = (IsAuthenticated,)
   serializer_class = CategorySerializer
+
+  def get_permissions(self):
+    if(self.action == 'create'):
+      permission_classes = (IsAuthenticated,IsOwnerOrIsAdmin,)
+    else:
+      permission_classes = (IsAuthenticated,)
+    return (permission() for permission in permission_classes)
 
   def get_queryset(self):
     if self.action in ('retrieve', 'update', 'destroy', 'partial_update'):
@@ -34,8 +41,14 @@ class CategoryViewset(viewsets.ModelViewSet):
 
 
 class IncomeViewset(viewsets.ModelViewSet):
-  permission_classes = (IsAuthenticated,)
   serializer_class = IncomeSerializer
+
+  def get_permissions(self):
+    if(self.action == 'create'):
+      permission_classes = (IsAuthenticated,IsOwnerOrIsAdmin,)
+    else:
+      permission_classes = (IsAuthenticated,)
+    return (permission() for permission in permission_classes)
   
   def get_queryset(self):
     if self.action in ('retrieve', 'update', 'destroy', 'partial_update'):
@@ -49,12 +62,12 @@ class IncomeViewset(viewsets.ModelViewSet):
     return queryset
   
 
-class CostOfCategoryViewset(viewsets.ModelViewSet):
+class CostOfCategoryViewset(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
   permission_classes = (IsAuthenticated,)
   serializer_class = CostSerializer
 
   def get_queryset(self):
-    if self.action in ('retrieve', 'update', 'destroy', 'partial_update'):
+    if self.action == 'retrieve':
       return get_cost_of_category(self.request.user,
                                   self.request.parser_context['kwargs'].get('category_pk'),
                                   self.request.parser_context['kwargs'].get('pk')
@@ -70,11 +83,13 @@ class CostOfCategoryViewset(viewsets.ModelViewSet):
     return queryset
 
 
-class CostViewset(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
+class CostViewset(viewsets.ModelViewSet):
   permission_classes = (IsAuthenticated,)
   serializer_class = CostSerializer
 
   def get_queryset(self):
+    if self.action in ('retrieve', 'update', 'destroy', 'partial_update'):
+      return get_cost(self.request.user, self.request.parser_context['kwargs'].get('pk'))
     queryset = get_costs(self.request.user)
     query_params = self.request.query_params
     limit = query_params.get('limit')

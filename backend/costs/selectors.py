@@ -33,6 +33,11 @@ def get_costs(user):
     return Cost.objects.all().order_by('-id')
   return Cost.objects.select_related('category').filter(category__user=user).order_by('-id')
 
+def get_cost(user, pk=None):
+  if user.is_staff:
+    return Cost.objects.filter(id=pk)
+  return Cost.objects.select_related('category').filter(category__user=user, id=pk)
+
 def get_incomes(user):
   if user.is_staff:
     return Income.objects.all().order_by('-id')

@@ -11,70 +11,72 @@
               </a>
             </router-link>
           </div>
-          <div class="col-xs-10 burger">
-            <svg height="20px" viewBox="0 -53 384 384" width="20px" xmlns="http://www.w3.org/2000/svg"><path d="m368 154.667969h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 32h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 277.332031h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/></svg>
+          <div class="col-xs-10 menu-loader" v-if="userIsLoading">
+            <div class="loader"></div>
           </div>
-          <div class="col-lg-10 col-xs-12 links">
-            <ul>
-              <template v-if="user">
-                <router-link 
-                  v-for="(item, index) in menuList"
-                  :key="index"
-                  :to="item.url"
-                  tag="li"
-                  active-class="active"
-                >
-                  <a>{{item.text}}</a>
-                </router-link>
-              </template>
-              
-              <template v-if="!user">
-                <router-link
-										to="/login"
-										tag="li"
-										active-class="active"
-                >
-                  <a>Sign in</a>
-                </router-link>
-                <router-link
-                    to="/register"
+          <template v-else>
+            <div class="col-xs-10 burger">
+              <svg height="20px" viewBox="0 -53 384 384" width="20px" xmlns="http://www.w3.org/2000/svg"><path d="m368 154.667969h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 32h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/><path d="m368 277.332031h-352c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h352c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0"/></svg>
+            </div>
+            <div class="col-lg-10 col-xs-12 links">
+              <ul>
+                <template v-if="authenticated">
+                  <router-link 
+                    v-for="(item, index) in menuList"
+                    :key="index"
+                    :to="item.url"
                     tag="li"
                     active-class="active"
-                >
-                  <a>Sign up</a>
-                </router-link>
-              </template>
-              <template v-else>
-                  <li>
-                    <a href="javascript:void(0)" @click="logout">Logout</a>
-                  </li>
-              </template>
-            </ul>
-          </div>
+                  >
+                    <a>{{item.text}}</a>
+                  </router-link>
+                </template>
+                
+                <template v-if="!authenticated">
+                  <router-link
+                      to="/login"
+                      tag="li"
+                      active-class="active"
+                  >
+                    <a>Sign in</a>
+                  </router-link>
+                  <router-link
+                      to="/register"
+                      tag="li"
+                      active-class="active"
+                  >
+                    <a>Sign up</a>
+                  </router-link>
+                </template>
+                <template v-else>
+                    <li>
+                      <a href="javascript:void(0)" @click="onLogout">Logout</a>
+                    </li>
+                </template>
+              </ul>
+            </div>
+          </template>
         </div>
       </div>
     </div>
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 import image from "@/assets/logo.png";
 export default {
   name: 'Menu',
   data(){
     return{
       "image": image,
-      "authenticated": false
     }
   },
   methods:{
-    logout(){
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      this.$store.dispatch('user/logout')
-      if(this.$route.path != '/home'){
-        this.$router.push('/home')
-      }
+    ...mapActions('user',{
+      logout:'logout'
+    }),
+    onLogout(){
+      this.logout()
     }
   },
   computed:{
@@ -82,7 +84,8 @@ export default {
       menuList: 'items'
     }),
     ...mapGetters('user', {
-      user: 'user'
+      userIsLoading: 'userIsLoading',
+      authenticated: 'authenticated',
     })
   }
 
@@ -233,5 +236,10 @@ export default {
     .burger{
         display: none!important;
     }
+}
+.col-xs-10.menu-loader{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

@@ -30,8 +30,8 @@ def calc_costs(user, data):
              'status':status.HTTP_400_BAD_REQUEST
            }
   try:
-    start_date = datetime.strptime(start_date, '%Y.%m.%d').date()
-    end_date = datetime.strptime(end_date, '%Y.%m.%d').date()
+    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
   except:
     return {
              'error': True, 

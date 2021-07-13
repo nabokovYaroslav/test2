@@ -6,6 +6,7 @@ import { store } from "./store/index";
 Vue.config.productionTip = false;
 
 import "@/assets/bootstrap-parody.css";
+import "@/assets/loader.css";
 
 new Vue({
   el: "#app",

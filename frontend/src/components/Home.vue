@@ -1,8 +1,8 @@
 <template>
   <div class="content">
-    <CostList/>
-    <IncomeList/>
-    <CategoryList/>
+    <CostList :isDeleteMode="false" :isLimitMode="true"/>
+    <IncomeList :isDeleteMode="false" :isLimitMode="true"/>
+    <CategoryList :isDeleteMode="false" :isLimitMode="true"/>
   </div>
 </template>
 
